@@ -12,7 +12,7 @@ import "./App.css";
 const initialState = {
   input: "",
   imageUrl: "",
-  box: {},
+  boxes: [],
   route: "signin",
   isSignedIn: false,
   user: {
@@ -45,21 +45,22 @@ class App extends React.Component {
   };
 
   calculateFaceLocation = (data) => {
-    const clarifaiFace =
-      data.outputs[0].data.regions[0].region_info.bounding_box;
     const image = document.getElementById("inputimage");
     const width = image.width;
     const height = image.height;
-    return {
-      leftCol: clarifaiFace.left_col * width,
-      topRow: clarifaiFace.top_row * height,
-      rightCol: width - clarifaiFace.right_col * width,
-      bottomRow: height - clarifaiFace.bottom_row * height,
-    };
+    return data.outputs[0].data.regions.map((region) => {
+      const clarifaiFace = region.region_info.bounding_box;
+      return {
+        leftCol: clarifaiFace.left_col * width,
+        topRow: clarifaiFace.top_row * height,
+        rightCol: width - clarifaiFace.right_col * width,
+        bottomRow: height - clarifaiFace.bottom_row * height,
+      };
+    });
   };
 
-  displayFaceBox = (box) => {
-    this.setState({ box: box });
+  displayFaceBox = (boxes) => {
+    this.setState({ boxes: boxes });
   };
 
   onInputChange = (event) => {
@@ -125,7 +126,7 @@ class App extends React.Component {
               onButtonSubmit={this.onPictureSubmit}
             />
             <FaceRecognition
-              box={this.state.box}
+              boxes={this.state.boxes}
               imageUrl={this.state.imageUrl}
             />
           </div>
